@@ -26,7 +26,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:background="#eff1f3"
-            android:gravity="center_vertical"
+            android:baselineAligned="false"
             android:orientation="horizontal"
             android:paddingLeft="12dp"
             android:paddingTop="8dp"
@@ -36,40 +36,55 @@
             <EditText
                 android:id="@+id/et_input"
                 android:layout_width="0dp"
-                android:layout_height="36dp"
+                android:layout_height="wrap_content"
+                android:layout_gravity="bottom"
                 android:layout_weight="1"
                 android:background="@drawable/shape_chat_input"
                 android:gravity="center_vertical"
                 android:importantForAutofill="no"
+                android:maxHeight="100dp"
                 android:paddingLeft="12dp"
+                android:paddingTop="8dp"
                 android:paddingRight="12dp"
+                android:paddingBottom="8dp"
                 tools:ignore="LabelFor,TextFields,UnusedAttribute"
-                tools:text="模拟消息" />
+                tools:text="模拟很长的消息" />
 
-            <TextView
-                android:id="@+id/tv_quick_reply"
+            <ImageView
+                android:id="@+id/iv_input_switch"
                 android:layout_width="30dp"
                 android:layout_height="30dp"
+                android:layout_gravity="bottom"
                 android:layout_marginStart="12dp"
                 android:layout_marginLeft="12dp"
-                android:background="@drawable/shape_chat_switch_button"
-                android:gravity="center"
-                android:text="T"
-                android:textColor="#252f3a"
-                android:textSize="20sp"
-                android:textStyle="bold" />
+                android:layout_marginBottom="4dp"
+                android:src="@drawable/chat_ic_handy_words" />
 
-            <TextView
-                android:id="@+id/tv_more_func"
+            <ImageView
+                android:id="@+id/iv_more_func"
                 android:layout_width="30dp"
                 android:layout_height="30dp"
+                android:layout_gravity="bottom"
                 android:layout_marginStart="12dp"
                 android:layout_marginLeft="12dp"
-                android:background="@drawable/shape_chat_switch_button"
+                android:layout_marginBottom="4dp"
+                android:src="@drawable/chat_ic_add" />
+
+
+            <TextView
+                android:id="@+id/tv_send"
+                android:layout_width="56dp"
+                android:layout_height="30dp"
+                android:layout_gravity="bottom"
+                android:layout_marginStart="12dp"
+                android:layout_marginLeft="12dp"
+                android:layout_marginBottom="4dp"
+                android:background="@drawable/shape_button_send"
                 android:gravity="center"
-                android:text="丸"
-                android:textSize="22sp"
-                android:textStyle="bold" />
+                android:text="发送"
+                android:textColor="@android:color/white"
+                android:textSize="14sp"
+                android:visibility="gone" />
         </LinearLayout>
 
         <View
@@ -78,10 +93,10 @@
             android:background="#DDDDDD" />
 
         <FrameLayout
-            android:visibility="gone"
             android:id="@+id/fl_func_panel"
             android:layout_width="match_parent"
-            android:layout_height="0dp">
+            android:layout_height="0dp"
+            android:visibility="gone">
 
             <com.kdl.coversation.NoAnimNoScrollVP
                 android:id="@+id/vp_panel"

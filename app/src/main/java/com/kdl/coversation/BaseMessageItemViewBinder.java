@@ -1,5 +1,6 @@
 package com.kdl.coversation;
 
+import android.graphics.Color;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -46,6 +47,10 @@ public abstract class BaseMessageItemViewBinder<VH extends BaseMessageItemViewBi
             holder.ll_start_container.setVisibility(View.VISIBLE);
             holder.ll_end_container.setVisibility(View.GONE);
             holder.fl_start_container.addView(holder.contentViewHolder.itemView);
+        }
+        if (item.getMessageType() == Message.Type.IMAGE) {
+            holder.fl_start_container.setBackgroundColor(Color.parseColor("#00000000"));
+            holder.fl_end_container.setBackgroundColor(Color.parseColor("#00000000"));
         }
     }
 

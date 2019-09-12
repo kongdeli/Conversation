@@ -3,6 +3,7 @@ package com.kdl.coversation;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+
 /**
  * <pre>
  *     author : linzheng

@@ -1,5 +1,6 @@
 package com.kdl.coversation;
 
+import android.graphics.Color;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -22,6 +23,11 @@ public class TextMessageItemViewBinder extends BaseMessageItemViewBinder<TextMes
     protected void onBindContentViewHolder(TextMessageViewHolder holder, Message item) {
         holder.itemView.setOnClickListener(view -> Toast.makeText(holder.itemView.getContext(), item.getContent(), Toast.LENGTH_SHORT).show());
         TextView tvMsg = holder.itemView.findViewById(R.id.tv_msg);
+        if(item.getMessageDirect() == Message.Direct.RECEIVE) {
+            tvMsg.setTextColor(Color.parseColor("#333333"));
+        }else {
+            tvMsg.setTextColor(Color.parseColor("#FFFFFF"));
+        }
         tvMsg.setText(item.getContent());
     }
 

@@ -6,6 +6,9 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.graphics.Rect;
 import android.os.Build;
+import android.text.Editable;
+import android.text.TextUtils;
+import android.text.TextWatcher;
 import android.util.DisplayMetrics;
 import android.view.Display;
 import android.view.MotionEvent;
@@ -13,6 +16,7 @@ import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.FrameLayout;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -30,11 +34,13 @@ public class ChatInputManager {
     private SharedPreferences mSp;
     private RecyclerView mMsgList;
     private View mInputArea;
-    private TextView mTvQuickReply;
-    private TextView mTvMoreFunc;
+    private ImageView mIvInputSwitch;
+    private ImageView mIvMoreFunc;
     private EditText mEtInput;
     private FrameLayout mFlFuncPanel;
     private NoAnimNoScrollVP mVpFunc;
+    private int mTempLineCount = 1;
+    private TextView mTvSend;
 
 
     public ChatInputManager(Activity activity, RecyclerView msgList, View inputArea) {
@@ -47,30 +53,45 @@ public class ChatInputManager {
     }
 
     private void findViews() {
-        mTvQuickReply = mInputArea.findViewById(R.id.tv_quick_reply);
-        mTvMoreFunc = mInputArea.findViewById(R.id.tv_more_func);
+        mIvInputSwitch = mInputArea.findViewById(R.id.iv_input_switch);
+        mIvMoreFunc = mInputArea.findViewById(R.id.iv_more_func);
         mEtInput = mInputArea.findViewById(R.id.et_input);
         mFlFuncPanel = mInputArea.findViewById(R.id.fl_func_panel);
         mVpFunc = mInputArea.findViewById(R.id.vp_panel);
+        mTvSend = mInputArea.findViewById(R.id.tv_send);
     }
 
+    @SuppressLint("ClickableViewAccessibility")
     private void bindViews() {
         bindEditText();
         bindQuickReplyButton();
+        mTvSend.setOnClickListener(view -> {
+            if (mActivity instanceof MainActivity) {
+                ((MainActivity) mActivity).onSendClick(mEtInput.getText());
+                mEtInput.getText().clear();
+            }
+        });
+        mMsgList.setOnTouchListener((view, motionEvent) -> {
+            closeFuncPanel(false);
+            closeKeyboard();
+            return false;
+        });
     }
 
     private void bindQuickReplyButton() {
-        mTvQuickReply.setOnClickListener(view -> {
+        mIvInputSwitch.setOnClickListener(view -> {
             // 点击快速回复按钮后，设置 ViewPager 的显示条目以展示相应界面
             if (mFlFuncPanel.isShown()) {
                 Toast.makeText(mActivity, "panel shown", Toast.LENGTH_SHORT).show();
+
             } else {
                 if (isSoftInputShown()) {
-                    lockListHeight();
+                    lockContentHeight();
                     showFuncPanel();
                     unlockContentHeightDelayed();
                 } else {
                     showFuncPanel();
+                    pullListToEnd();
                 }
             }
         });
@@ -82,7 +103,10 @@ public class ChatInputManager {
         }, 200L);
     }
 
-    private void lockListHeight() {
+    /**
+     * 固定住 recyclerView 的高度，防止因为底部面板消失导致列表高度变化，而引起界面闪动
+     */
+    private void lockContentHeight() {
         LinearLayout.LayoutParams params = (LinearLayout.LayoutParams) mMsgList.getLayoutParams();
         params.height = mMsgList.getHeight();
         params.weight = 0;
@@ -140,17 +164,52 @@ public class ChatInputManager {
     private void bindEditText() {
         if (mEtInput == null) return;
         mEtInput.requestFocus();
-        mEtInput.setOnTouchListener(new View.OnTouchListener() {
+        mEtInput.addTextChangedListener(new TextWatcher() {
             @Override
-            public boolean onTouch(View view, MotionEvent event) {
-                if (event.getAction() == MotionEvent.ACTION_UP && mFlFuncPanel.isShown()) {
-                    lockListHeight();
-                    closeFuncPanel(true);
-                    unlockContentHeightDelayed();
+            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+                if (!TextUtils.isEmpty(charSequence)) {
+                    mIvMoreFunc.setVisibility(View.GONE);
+                    mTvSend.setVisibility(View.VISIBLE);
+                } else {
+                    mIvMoreFunc.setVisibility(View.VISIBLE);
+                    mTvSend.setVisibility(View.GONE);
                 }
-                return false;
+                int lineCount = mEtInput.getLineCount();
+                if (lineCount != mTempLineCount) {
+                    onInputLineChange();
+                    mTempLineCount = lineCount;
+                }
+            }
+
+            @Override
+            public void afterTextChanged(Editable editable) {
+
             }
         });
+        mEtInput.setOnTouchListener((view, event) -> {
+            if (event.getAction() == MotionEvent.ACTION_UP && mFlFuncPanel.isShown()) {
+                lockContentHeight();
+                closeFuncPanel(true);
+                unlockContentHeightDelayed();
+            }
+            return false;
+        });
+    }
+
+    private void onInputLineChange() {
+        pullListToEnd();
+    }
+
+    private void pullListToEnd() {
+        RecyclerView.Adapter adapter = mMsgList.getAdapter();
+        if (adapter != null) {
+            mMsgList.scrollToPosition(adapter.getItemCount() - 1);
+        }
     }
 
     private void closeFuncPanel(boolean showKeyboard) {
