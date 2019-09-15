@@ -109,7 +109,7 @@ public class MainActivity extends AppCompatActivity implements KeyboardWatcher.O
     public void onSendClick(Editable text) {
         mItems.add(new Message(text.toString(), Message.Type.TXT, Message.Direct.SEND));
         mAdapter.notifyItemInserted(mAdapter.getItemCount() - 1);
-        mRvMsgList.scrollToPosition(mAdapter.getItemCount()-1);
+        mRvMsgList.scrollToPosition(mAdapter.getItemCount() - 1);
     }
 
     public void onNewMessage(Message message) {
