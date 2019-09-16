@@ -7,6 +7,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import android.os.Bundle;
 import android.text.Editable;
+import android.util.Log;
 import android.widget.LinearLayout;
 
 import java.util.ArrayList;
@@ -15,7 +16,8 @@ import java.util.List;
 import me.drakeet.multitype.Items;
 import me.drakeet.multitype.MultiTypeAdapter;
 
-public class MainActivity extends AppCompatActivity implements KeyboardWatcher.OnKeyboardToggleListener {
+public class MainActivity extends AppCompatActivity implements BaseMessageItemViewBinder.OnItemClickListener /*implements KeyboardWatcher.onKeyboardToggleListenerRef*/ {
+    private static final String TAG = MainActivity.class.getSimpleName();
     MultiTypeAdapter mAdapter;
     Items mItems;
     RecyclerView mRvMsgList;
@@ -36,19 +38,23 @@ public class MainActivity extends AppCompatActivity implements KeyboardWatcher.O
     private void initInputArea() {
         List<Fragment> fragments = new ArrayList<>();
         fragments.add(ChatHandyWordsFragment.newInstance(0, 0));
-        fragments.add(new ChatFunctionsFragment());
+        fragments.add(ChatFunctionsFragment.newInstance(0));
 
         mChatInputManager = new ChatInputManager(this, mRvMsgList, mLlInputArea);
-        mKeyboardWatcher = new KeyboardWatcher(this);
-        mKeyboardWatcher.setListener(this);
+//        mKeyboardWatcher = new KeyboardWatcher(this);
+//        mKeyboardWatcher.setListener(this);
     }
 
     private void initRecyclerView() {
         mRvMsgList.setLayoutManager(new LinearLayoutManager(this));
         mAdapter = new MultiTypeAdapter();
+        TextMessageItemViewBinder textBinder = new TextMessageItemViewBinder();
+        ImageMessageItemViewBinder imageBinder = new ImageMessageItemViewBinder();
+        textBinder.setItemClickListener(this);
+        imageBinder.setItemClickListener(this);
         mItems = new Items();
         mAdapter.register(Message.class)
-                .to(new TextMessageItemViewBinder(), new ImageMessageItemViewBinder())
+                .to(textBinder, imageBinder)
                 .withClassLinker((position, message) -> {
                     if (message.getMessageType() == Message.Type.TXT) {
                         return TextMessageItemViewBinder.class;
@@ -81,15 +87,15 @@ public class MainActivity extends AppCompatActivity implements KeyboardWatcher.O
         mAdapter.notifyDataSetChanged();
     }
 
-    @Override
-    public void onKeyboardShown(int keyboardSize) {
-        mRvMsgList.scrollToPosition(mAdapter.getItemCount() - 1);
-    }
+//    @Override
+//    public void onKeyboardShown(int keyboardSize) {
+//        mRvMsgList.scrollToPosition(mAdapter.getItemCount() - 1);
+//    }
 
-    @Override
-    public void onKeyboardClosed() {
-
-    }
+//    @Override
+//    public void onKeyboardClosed() {
+//
+//    }
 
     @Override
     protected void onDestroy() {
@@ -114,5 +120,11 @@ public class MainActivity extends AppCompatActivity implements KeyboardWatcher.O
 
     public void onNewMessage(Message message) {
 
+    }
+
+    @Override
+    public void onItemClick(Message message) {
+        mChatInputManager.closeFuncPanel(false);
+        mChatInputManager.closeKeyboard();
     }
 }

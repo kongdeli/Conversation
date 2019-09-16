@@ -11,5 +11,4 @@
     android:paddingRight="8dp"
     android:layout_height="wrap_content"
     android:minHeight="36dp"
-    android:textIsSelectable="true"
     android:textColor="#FFFFFF" />

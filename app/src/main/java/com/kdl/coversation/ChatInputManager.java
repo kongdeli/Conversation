@@ -10,6 +10,7 @@ import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.util.DisplayMetrics;
+import android.util.TypedValue;
 import android.view.Display;
 import android.view.MotionEvent;
 import android.view.View;
@@ -27,7 +28,7 @@ import androidx.recyclerview.widget.RecyclerView;
 /**
  * 聊天界面的输入框及面板的控制
  */
-public class ChatInputManager {
+public class ChatInputManager implements KeyboardWatcher.OnKeyboardToggleListener {
     private static final String KEY_BOARD_HEIGHT = "keyboard_height";
     private Activity mActivity;
     private InputMethodManager mInputMethodManager;
@@ -76,13 +77,19 @@ public class ChatInputManager {
             closeKeyboard();
             return false;
         });
+        KeyboardWatcher watcher = new KeyboardWatcher(mActivity);
+        /* 为什么用匿名内部类来实现会导致 KeyboardWatcher 类中的 listener 引用为空，而直接在本类实现接口却不会？*/
+        watcher.setListener(this);
     }
 
     private void bindQuickReplyButton() {
         mIvInputSwitch.setOnClickListener(view -> {
             // 点击快速回复按钮后，设置 ViewPager 的显示条目以展示相应界面
+            mEtInput.clearFocus();
             if (mFlFuncPanel.isShown()) {
-                Toast.makeText(mActivity, "panel shown", Toast.LENGTH_SHORT).show();
+                lockContentHeight();
+                closeFuncPanel(true);
+                unlockContentHeightDelayed();
 
             } else {
                 if (isSoftInputShown()) {
@@ -98,18 +105,18 @@ public class ChatInputManager {
     }
 
     private void unlockContentHeightDelayed() {
-        mEtInput.postDelayed(() -> {
-            ((LinearLayout.LayoutParams) mMsgList.getLayoutParams()).weight = 1;
-        }, 200L);
+//        mEtInput.postDelayed(() -> {
+//            ((LinearLayout.LayoutParams) mMsgList.getLayoutParams()).weight = 1;
+//        }, 200L);
     }
 
     /**
      * 固定住 recyclerView 的高度，防止因为底部面板消失导致列表高度变化，而引起界面闪动
      */
     private void lockContentHeight() {
-        LinearLayout.LayoutParams params = (LinearLayout.LayoutParams) mMsgList.getLayoutParams();
-        params.height = mMsgList.getHeight();
-        params.weight = 0;
+//        LinearLayout.LayoutParams params = (LinearLayout.LayoutParams) mMsgList.getLayoutParams();
+//        params.height = mMsgList.getHeight();
+//        params.weight = 0;
     }
 
     private void showFuncPanel() {
@@ -119,11 +126,11 @@ public class ChatInputManager {
             keyboardHeight = (int) SPUtils.get(mActivity, KEY_BOARD_HEIGHT, 600);
         }
         closeKeyboard();
-        mFlFuncPanel.getLayoutParams().height = keyboardHeight;
+        mFlFuncPanel.getLayoutParams().height = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 172, mActivity.getResources().getDisplayMetrics());
         mFlFuncPanel.setVisibility(View.VISIBLE);
     }
 
-    private void closeKeyboard() {
+    public void closeKeyboard() {
         mInputMethodManager.hideSoftInputFromWindow(mEtInput.getWindowToken(), 0);
     }
 
@@ -212,7 +219,7 @@ public class ChatInputManager {
         }
     }
 
-    private void closeFuncPanel(boolean showKeyboard) {
+    public void closeFuncPanel(boolean showKeyboard) {
         if (mFlFuncPanel.isShown()) {
             mFlFuncPanel.setVisibility(View.GONE);
             if (showKeyboard) {
@@ -232,5 +239,15 @@ public class ChatInputManager {
             return true;
         }
         return false;
+    }
+
+    @Override
+    public void onKeyboardShown(int keyboardSize) {
+        pullListToEnd();
+    }
+
+    @Override
+    public void onKeyboardClosed() {
+
     }
 }

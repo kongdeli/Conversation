@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="是肯德基放辣椒；劳动纠纷拉萨的肌肤卢卡斯江东父老看见啊说" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:text="是肯德基放辣椒；劳动纠纷拉萨的肌肤卢卡斯江东父老看萨芬发生地方见啊说" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:text="是肯德基放辣椒；劳动纠纷拉萨的肌肤卢卡斯江东父老看见啊说" />
+
+</LinearLayout>

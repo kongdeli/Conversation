@@ -24,7 +24,7 @@ import me.drakeet.multitype.ItemViewBinder;
  * </pre>
  */
 public abstract class BaseMessageItemViewBinder<VH extends BaseMessageItemViewBinder.ContentViewHolder> extends ItemViewBinder<Message, BaseMessageItemViewBinder.MessageViewHolder> {
-
+    protected OnItemClickListener mItemClickListener;
 
     @NonNull
     @Override
@@ -52,6 +52,7 @@ public abstract class BaseMessageItemViewBinder<VH extends BaseMessageItemViewBi
             holder.fl_start_container.setBackgroundColor(Color.parseColor("#00000000"));
             holder.fl_end_container.setBackgroundColor(Color.parseColor("#00000000"));
         }
+        holder.itemView.setOnClickListener(v -> mItemClickListener.onItemClick(item));
     }
 
     protected abstract void onBindContentViewHolder(VH holder, Message item);
@@ -81,13 +82,20 @@ public abstract class BaseMessageItemViewBinder<VH extends BaseMessageItemViewBi
             iv_user_head = itemView.findViewById(R.id.iv_user_head);
             this.contentViewHolder = contentViewHolder;
         }
-
     }
 
     public static class ContentViewHolder extends RecyclerView.ViewHolder {
         public ContentViewHolder(View itemView) {
             super(itemView);
         }
+    }
+
+    public interface OnItemClickListener {
+        void onItemClick(Message message);
+    }
+
+    public void setItemClickListener(OnItemClickListener listener) {
+        mItemClickListener = listener;
     }
 
 }
