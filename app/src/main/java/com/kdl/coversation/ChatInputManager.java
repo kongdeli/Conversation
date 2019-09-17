@@ -18,9 +18,7 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.annotation.RequiresApi;
 import androidx.recyclerview.widget.RecyclerView;
@@ -42,6 +40,10 @@ public class ChatInputManager implements KeyboardWatcher.OnKeyboardToggleListene
     private NoAnimNoScrollVP mVpFunc;
     private int mTempLineCount = 1;
     private TextView mTvSend;
+    private KeyboardWatcher mWatcher;
+
+    private boolean mIsShowAdd;
+    private boolean mIsShowWords;
 
 
     public ChatInputManager(Activity activity, RecyclerView msgList, View inputArea) {
@@ -65,7 +67,8 @@ public class ChatInputManager implements KeyboardWatcher.OnKeyboardToggleListene
     @SuppressLint("ClickableViewAccessibility")
     private void bindViews() {
         bindEditText();
-        bindQuickReplyButton();
+        bindHandyWordsButton();
+        bindAddButton();
         mTvSend.setOnClickListener(view -> {
             if (mActivity instanceof MainActivity) {
                 ((MainActivity) mActivity).onSendClick(mEtInput.getText());
@@ -77,20 +80,52 @@ public class ChatInputManager implements KeyboardWatcher.OnKeyboardToggleListene
             closeKeyboard();
             return false;
         });
-        KeyboardWatcher watcher = new KeyboardWatcher(mActivity);
+        mWatcher = new KeyboardWatcher(mActivity);
         /* 为什么用匿名内部类来实现会导致 KeyboardWatcher 类中的 listener 引用为空，而直接在本类实现接口却不会？*/
-        watcher.setListener(this);
+        mWatcher.setListener(this);
     }
 
-    private void bindQuickReplyButton() {
+    private void bindAddButton() {
+        mIvMoreFunc.setOnClickListener(v -> {
+            if (mFlFuncPanel.isShown()) {
+                if (mIsShowWords) {
+                    mVpFunc.setCurrentItem(1);
+                    mIsShowAdd = true;
+                    mIsShowWords = false;
+                } else {
+                    lockContentHeight();
+                    closeFuncPanel(true);
+                    mIsShowAdd = false;
+                    unlockContentHeightDelayed();
+                }
+            } else {
+                if (isSoftInputShown()) {
+                    lockContentHeight();
+                    showFuncPanel();
+                    unlockContentHeightDelayed();
+                } else {
+                    showFuncPanel();
+                }
+                mVpFunc.setCurrentItem(1);
+                mIsShowAdd = true;
+            }
+        });
+    }
+
+    private void bindHandyWordsButton() {
         mIvInputSwitch.setOnClickListener(view -> {
             // 点击快速回复按钮后，设置 ViewPager 的显示条目以展示相应界面
             mEtInput.clearFocus();
             if (mFlFuncPanel.isShown()) {
-                lockContentHeight();
-                closeFuncPanel(true);
-                unlockContentHeightDelayed();
-
+                if (mIsShowAdd) {
+                    mVpFunc.setCurrentItem(0);
+                    mIsShowWords = true;
+                    mIsShowAdd = false;
+                } else {
+                    lockContentHeight();
+                    closeFuncPanel(true);
+                    unlockContentHeightDelayed();
+                }
             } else {
                 if (isSoftInputShown()) {
                     lockContentHeight();
@@ -100,9 +135,12 @@ public class ChatInputManager implements KeyboardWatcher.OnKeyboardToggleListene
                     showFuncPanel();
                     pullListToEnd();
                 }
+                mVpFunc.setCurrentItem(0);
+                mIsShowWords = true;
             }
         });
     }
+
 
     private void unlockContentHeightDelayed() {
 //        mEtInput.postDelayed(() -> {
@@ -249,5 +287,11 @@ public class ChatInputManager implements KeyboardWatcher.OnKeyboardToggleListene
     @Override
     public void onKeyboardClosed() {
 
+    }
+
+    public void release() {
+        if (mWatcher != null) {
+            mWatcher.destroy();
+        }
     }
 }

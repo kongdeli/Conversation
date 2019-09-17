@@ -11,7 +11,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
-class ChatFunctionsFragment extends androidx.fragment.app.Fragment implements View.OnClickListener {
+public  class ChatFunctionsFragment extends androidx.fragment.app.Fragment implements View.OnClickListener {
 
     private ImageView mIvGallery;
 

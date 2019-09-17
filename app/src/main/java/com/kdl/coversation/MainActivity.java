@@ -4,10 +4,10 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.viewpager.widget.ViewPager;
 
 import android.os.Bundle;
 import android.text.Editable;
-import android.util.Log;
 import android.widget.LinearLayout;
 
 import java.util.ArrayList;
@@ -17,12 +17,11 @@ import me.drakeet.multitype.Items;
 import me.drakeet.multitype.MultiTypeAdapter;
 
 public class MainActivity extends AppCompatActivity implements BaseMessageItemViewBinder.OnItemClickListener /*implements KeyboardWatcher.onKeyboardToggleListenerRef*/ {
-    private static final String TAG = MainActivity.class.getSimpleName();
     MultiTypeAdapter mAdapter;
     Items mItems;
     RecyclerView mRvMsgList;
     private LinearLayout mLlInputArea;
-    private KeyboardWatcher mKeyboardWatcher;
+    private ViewPager mVpPanel;
     private ChatInputManager mChatInputManager;
 
     @Override
@@ -31,15 +30,18 @@ public class MainActivity extends AppCompatActivity implements BaseMessageItemVi
         setContentView(R.layout.activity_main);
         mRvMsgList = findViewById(R.id.rv_msgs);
         mLlInputArea = findViewById(R.id.ll_input_area);
+        mVpPanel = findViewById(R.id.vp_panel);
         initRecyclerView();
         initInputArea();
     }
 
     private void initInputArea() {
         List<Fragment> fragments = new ArrayList<>();
-        fragments.add(ChatHandyWordsFragment.newInstance(0, 0));
-        fragments.add(ChatFunctionsFragment.newInstance(0));
-
+        fragments.add(new ChatHandyWordsFragment());
+        fragments.add(new ChatFunctionsFragment());
+        CommonPagerAdapter adapter = new CommonPagerAdapter(getSupportFragmentManager(), fragments);
+        mVpPanel.setAdapter(adapter);
+        mVpPanel.setCurrentItem(0);
         mChatInputManager = new ChatInputManager(this, mRvMsgList, mLlInputArea);
 //        mKeyboardWatcher = new KeyboardWatcher(this);
 //        mKeyboardWatcher.setListener(this);
@@ -99,8 +101,8 @@ public class MainActivity extends AppCompatActivity implements BaseMessageItemVi
 
     @Override
     protected void onDestroy() {
-        if (mKeyboardWatcher != null) {
-            mKeyboardWatcher.destroy();
+        if (mChatInputManager != null) {
+            mChatInputManager.release();
         }
         super.onDestroy();
     }
@@ -116,10 +118,6 @@ public class MainActivity extends AppCompatActivity implements BaseMessageItemVi
         mItems.add(new Message(text.toString(), Message.Type.TXT, Message.Direct.SEND));
         mAdapter.notifyItemInserted(mAdapter.getItemCount() - 1);
         mRvMsgList.scrollToPosition(mAdapter.getItemCount() - 1);
-    }
-
-    public void onNewMessage(Message message) {
-
     }
 
     @Override
